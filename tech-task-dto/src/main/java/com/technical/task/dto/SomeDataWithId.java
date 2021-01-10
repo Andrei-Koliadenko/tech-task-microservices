@@ -20,15 +20,6 @@ public class SomeDataWithId extends SomeData {
 		super();
 	}
 
-	public SomeDataWithId(String something) {
-		super(something);
-	}
-
-	public SomeDataWithId(int id) {
-		super();
-		this.id = id;
-	}
-
 	public SomeDataWithId(String something, int id) {
 		super(something);
 		this.id = id;
