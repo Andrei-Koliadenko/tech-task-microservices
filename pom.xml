@@ -94,5 +94,7 @@
 		<module>tech-task-discovery-server</module>
 		<module>tech-task-discovery-client</module>
 		<module>tech-task-dto</module>
+		<module>tech-task-instance-url</module>
+		<module>tech-task-some-controller</module>
 	</modules>
 </project>
