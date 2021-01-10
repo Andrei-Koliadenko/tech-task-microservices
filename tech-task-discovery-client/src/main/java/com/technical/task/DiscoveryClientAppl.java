@@ -1,51 +1,34 @@
 package com.technical.task;
 
 import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Resource;
-import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
 
-import com.technical.task.dto.SomeData;
-import com.technical.task.dto.SomeDataWithId;
+import com.technical.task.component.InstanceUrl;
 
 @SpringBootApplication
-@RestController
 public class DiscoveryClientAppl {
 	final static Logger LOG = LoggerFactory.getLogger(DiscoveryClientAppl.class);
-	Map<String, SomeData> someMap;
 
-	@GetMapping("/api/resource/{id}")
-	List<SomeDataWithId> getSomeData(@PathVariable("id") int id) {
+	public static void main(String[] args) throws InterruptedException {
+		ConfigurableApplicationContext ctx = SpringApplication.run(DiscoveryClientAppl.class, args);
+		InstanceUrl iu = ctx.getBean(InstanceUrl.class);
+		DiscoveryClient dc = ctx.getBean(DiscoveryClient.class);
 
-		LOG.debug("Some data with id sent");
-		return null;
-	}
+		while (true) {
+			List<String> services = dc.getServices();
+			services.forEach(s -> {
+				System.out.printf("Service: %s, url: %s\n", s, iu.getServiceUrl(s));
+			});
 
-	@PostMapping("/api")
-	SomeData addSomeData(@RequestBody SomeData someData) {
-
-		LOG.debug("Some data {} added", someData.getSomething());
-		return someData;
-	}
-
-	public static void main(String[] args) {
-		SpringApplication.run(DiscoveryClientAppl.class, args);
+			Thread.sleep(30000);
+		}
 	}
 
 }
