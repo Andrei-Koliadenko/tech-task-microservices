@@ -1,0 +1,12 @@
+--- 
+services: 
+  discovery-client: 
+    build: tech-task-discovery-client
+  discovery-server: 
+    build: tech-task-discovery-server
+    ports: 
+      - "8761:8761"
+  some-conroller: 
+    build: tech-task-some-conroller
+    mem_limit: 350m
+version: "2.1"
