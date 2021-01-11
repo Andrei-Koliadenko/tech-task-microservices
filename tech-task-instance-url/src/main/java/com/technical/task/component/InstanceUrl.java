@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -28,14 +29,15 @@ public class InstanceUrl {
 	@Value("${app-discovery-period-seconds:30}")
 	long discoveryPeriodSec;
 	
-	public synchronized HashSet<String> getInstancesUrl(String serviceName) {
+	public synchronized List<String> getInstancesUrl(String serviceName) {
 		HashSet<String> instances = serviceInstances.getOrDefault(serviceName, new HashSet<>());
 		if (serviceLastDiscovery.get(serviceName) == null || instances.isEmpty()
 				|| ChronoUnit.SECONDS.between(serviceLastDiscovery.getOrDefault(serviceName, Instant.now()),
 						Instant.now()) > discoveryPeriodSec) {
 			updateServiceInstances(serviceName, instances);
 		}
-		return instances;
+		List<String> res = instances.stream().collect(Collectors.toList());
+		return res;
 	}
 
 	public synchronized String getServiceUrl(String serviceName) {
