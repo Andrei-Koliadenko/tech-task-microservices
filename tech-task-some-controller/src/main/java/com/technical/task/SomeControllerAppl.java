@@ -8,6 +8,7 @@ import static com.technical.task.api.ApiConstants.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.technical.task.component.InstanceUrl;
 import com.technical.task.dto.SomeData;
 import com.technical.task.dto.SomeDataWithId;
 
@@ -32,6 +34,8 @@ public class SomeControllerAppl {
 	final static Logger LOG = LoggerFactory.getLogger(SomeControllerAppl.class);
 	RestTemplate restTemplate = new RestTemplate();
 	Map<Integer, SomeData> someMap = new HashMap<Integer, SomeData>();
+	@Autowired
+	InstanceUrl instanceUrl; 
 
 	@Value("${spring.application.name}")
 	String serviceName;
@@ -99,8 +103,7 @@ public class SomeControllerAppl {
 	}
 
 	private List<String> getServiceUrls(String serviceName) {
-		// TODO
-		return null;
+		return instanceUrl.getInstancesUrl(serviceName);
 	}
 
 	private SomeData getSomeDataFromAnotherInstance(String shortUrl, int id) {
