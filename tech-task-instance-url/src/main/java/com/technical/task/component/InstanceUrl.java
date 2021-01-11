@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -26,7 +27,7 @@ public class InstanceUrl {
 																	// discovery
 	@Value("${app-discovery-period-seconds:30}")
 	long discoveryPeriodSec;
-
+	
 	public synchronized HashSet<String> getInstancesUrl(String serviceName) {
 		HashSet<String> instances = serviceInstances.getOrDefault(serviceName, new HashSet<>());
 		if (serviceLastDiscovery.get(serviceName) == null || instances.isEmpty()
@@ -37,6 +38,20 @@ public class InstanceUrl {
 		return instances;
 	}
 
+	public synchronized String getServiceUrl(String serviceName) {
+		String res = "";
+		HashSet<String> instances = serviceInstances.getOrDefault(serviceName, new HashSet<>());
+		if (serviceLastDiscovery.get(serviceName) == null || instances.isEmpty()
+				|| ChronoUnit.SECONDS.between(serviceLastDiscovery.getOrDefault(serviceName, Instant.now()),
+						Instant.now()) > discoveryPeriodSec) {
+			updateServiceInstances(serviceName, instances);
+		}
+		if (!instances.isEmpty()) {
+			res = getUrl(instances);
+		}
+		return res;
+	}
+
 	private void updateServiceInstances(String serviceName, HashSet<String> instances) {
 		HashSet<String> upToDateInstances = dc.getInstances(serviceName).stream().map(si -> si.getUri().toString())
 				.collect(Collectors.toCollection(HashSet::new));
@@ -45,5 +60,16 @@ public class InstanceUrl {
 		instances.addAll(upToDateInstances); // added new instances
 		serviceLastDiscovery.put(serviceName, Instant.now());
 		serviceInstances.putIfAbsent(serviceName, instances);
+	}
+	
+
+	private String getUrl(HashSet<String> instances) {
+		// implementation of RRA (Round Robin Algorithm) algorithm
+		Iterator<String> it = instances.iterator();
+		String res = it.next();
+		it.remove();
+		instances.add(res);
+
+		return res;
 	}
 }
